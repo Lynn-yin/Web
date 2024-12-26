@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册页面</title>
+  <style>
+    * {
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    h1 {
+      width: 80%;
+      margin: 0 auto;
+      height: 100px;
+      background-color: skyblue; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      color: white;
+      font-size: 40px;
+    }
+
+    form {
+      width: 600px;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      border: 3px solid pink;
+      border-radius: 15px;
+      margin: 30px auto;
+      padding-top: 50px;
+      position: relative;
+    }
+
+    form>label {
+      height: 60px;
+      font-size: 25px;
+    }
+
+    form>label>input {
+      padding-left: 10px;
+      font-size: 22px;
+      width: 60%;
+    }
+
+    form>button {
+      font-size: 22px;
+      width: 70%;
+    }
+
+  </style>
+</head>
+
+<body>
+  <h1>注册页面</h1>
+  <form>
+
+    <label>
+      用 户 名 :<input class="name" type="text" style="margin-left: 13px">
+    </label>
+    <label>
+      密　　码: <input class="pwd" type="password">
+    </label>
+    <label>
+      确认密码: <input class="rpwd" type="password">
+    </label>
+    <label>
+      昵　　称: <input class="nickname" type="text">
+    </label>
+    <label>
+      已有账户,
+      <a href="./login.html" style="color: skyblue; text-decoration: none;">点击登录</a>
+    </label>
+    <button style="font-size: 25px;">注册</button>
+  </form>
+
+  <script src="/pages/axios.min.js"></script>
+  <script src="/pages/http.js"></script>
+
+  <script>
+    const form = document.querySelector('form');
+    const name = document.querySelector('.name');
+    const pwd = document.querySelector('.pwd');
+    const rpwd = document.querySelector('.rpwd');
+    const nickname = document.querySelector('.nickname');
+    const span = document.querySelector('span');
+    
+    // 给表单绑定一个提交事件
+    form.addEventListener('submit', async function (e) {
+      // 阻止表单默认提交
+      e.preventDefault();
+      if (name.value === '' || pwd.value === '' || rpwd.value === '' || nickname.value === '') {
+        alert('请填写完整信息');
+        return;
+      }
+      if (pwd.value !== rpwd.value) {
+        alert('两次密码输入不一致');
+        return;
+      }
+      // 发送请求
+      let res = await http.post('/users/register', { username: name.value, password: pwd.value, rpassword: rpwd.value, nickname: nickname.value })
+      
+      if (res.data.code != 1) {
+        alert('注册失败');
+      } else {
+        alert("注册成功")
+        setTimeout(() => {
+                window.location.href = './login.html';
+      }, 0);
+      } 
+    })
+  </script>
+</body>
+
+</html>

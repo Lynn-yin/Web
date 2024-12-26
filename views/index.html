@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>首页</title>
+  <!-- 引入swiper文件 -->
+  <link rel="stylesheet" href="../lib/swiper/swiper-bundle.min.css">
+  <style>
+    * {
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    h1 {
+      width: 80%;
+      margin: 0 auto;
+      height: 100px;
+      background-color: skyblue; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      color: white;
+      font-size: 40px;
+    }
+
+    h1>p {
+      font-size: 25px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      right: 50px;
+      display: none;
+    }
+
+    h1>p.active {
+      display: block;
+    }
+
+    h1>p>span {
+      color: black;
+    }
+    
+    h1>p>button {
+
+      padding: 5px 8px;
+      border: none;
+      border-radius: 5px;
+      background-color: #fff;
+      color: #000;
+      cursor: pointer;
+      font-size: 16px;
+      
+    }
+    /* 轮播图大小控制 */
+    .relay {
+      height: 700px;
+      width: 80%;
+      background-color: pink;
+    }
+
+    
+    html,
+    body {
+      position: relative;
+      height: 100%;
+    }
+
+    body {
+      background: #eee;
+      font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      color: #000;
+      margin: 0;
+      padding: 0;
+    }
+
+    .swiper {
+      width: 100%;
+      height: 100%;
+    }
+
+    .swiper-slide {
+      text-align: center;
+      font-size: 18px;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .swiper-slide img {
+      display: block;
+      width: 100%;
+      height: 100%;
+
+    }
+  </style>
+  <style type="text/css">
+    .swiper {
+      --swiper-navigation-color: #dae9e8;
+      --swiper-navigation-size: 100px;
+    }
+    a{
+      color: #000;
+      text-decoration: none;
+    }
+    
+  </style>
+</head>
+
+<body>
+
+  <h1>
+    仿站电商平台
+    <p class="off">
+      您好！<a href="login.html" style="color: red;">请登录</a>
+    </p>
+    
+    <p class="on active">你好！<span class="nickname" style="color: white;">lyy</span>
+      <button class="self">个人中心</button>
+      <button class="logout">退出登录</button>
+    </p>
+      
+  </h1>
+
+  <script src="/pages/axios.min.js"></script>
+  <script src="/pages/http.js"></script>
+
+  <!-- 购买商品 -->
+  <div style="font-size: 40px; font-weight: 700;text-align: center;margin:8px;"><a href="list.html">购买商品</a></div>
+
+  <script>
+    /*
+      首页需要校验用户是否已经登录
+        - 如果已经登录过则需要保存登录状态
+        - 但是http是一个请求响应协议,也是一个无状态协议
+          + 无状态协议
+            - 对于服务器来说,同一个接口的前一次和后一次请求;服务器无法识别是否是同一个人
+        - 可以使用token技术解决
+          + token: 就是后端返回的具有特殊含义的一段字符串
+            - 相当于 令牌
+        - 在登录及后续校验用户状态中使用token
+          + 当请求登录接口,登录成功后则在响应数据中会将token数据返回
+          + 前端接收到token数据则将其存储到本地
+          + 后续如果请求需要校验身份的接口 则将token携带上
+            - 后端会进行校验(如果token没问题则正常获取数据)
+    */
+    /* 
+      校验用户是否已经登录
+        - 请求一个用户登录后才可以使用的接口
+          + 获取用户详情接口
+            - 地址: http://localhost:8888/users/info
+            - 请求方式: get
+            - 请求携带的数据: token(请求头),id(用户id)
+    */
+
+    let pEles = document.querySelectorAll('p');
+
+
+    // 校验用户是否登录
+    async function fn() {
+      let {status, info, id} = await isLogin();
+    
+      //未登录
+      console.log(status);
+
+      if(status != 1){
+        pEles[0].classList.add('active');
+        pEles[1].classList.remove('active');
+        return;
+      }
+      // 已登录
+      pEles[0].classList.remove('active');
+      pEles[1].classList.add('active');
+
+      pEles[1].children[0].innerHTML = info.nickname;
+
+      pEles[1].addEventListener('click', ({target}) => {
+      console.log(target);
+      if(target.className =='self'){
+        location.href = './self.html';
+      }
+
+      if(target.className == 'logout'){
+        if(!confirm('确定退出登录吗?'))return;
+
+        //本地存储id移除
+        localStorage.removeItem('uid');
+        localStorage.removeItem('token');
+
+        http.get('/users/logout', { params: { id } })
+
+        pEles[0].classList.add('active');
+        pEles[1].classList.remove('active');
+
+      }
+      });
+    }
+    fn();  
+    
+  </script>
+  <!-- 下面是轮播图功能 -->
+  <div class="relay">
+    <div class="swiper mySwiper">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide"><img src="../img/img1.jpg" alt=""></div>
+        <div class="swiper-slide"><img src="../img/img2.jpg" alt=""></div>
+        <div class="swiper-slide"><img src="../img/img3.jpg" alt=""></div>
+        <div class="swiper-slide"><img src="../img/img4.jpg" alt=""></div>
+        <div class="swiper-slide"><img src="../img/img5.jpg" alt=""></div>
+      </div>
+      <div class="swiper-button-prev"></div><!--左箭头。如果放置在swiper外面，需要自定义样式。-->
+      <div class="swiper-button-next"></div><!--右箭头。如果放置在swiper外面，需要自定义样式。-->
+      <div class="swiper-pagination"></div>
+    </div>
+  </div>
+  <!-- 引入swiper的js部分 -->
+  <!-- 首页轮播图功能 -->
+  <script src="../lib/swiper/swiper-bundle.min.js"></script>
+  <script>
+    var swiper = new Swiper(".mySwiper", {
+      pagination: {
+        el: ".swiper-pagination",
+      },
+      autoplay: {
+        delay: 1000,//1秒切换一次
+        pauseOnMouseEnter: true,
+      },//鼠标经过停止自动播放
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+    });
+  </script>
+</body>
+
+</html>

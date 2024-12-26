@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品列表</title>
+</head>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  h1 {
+    width: 1194px;
+    margin: 0 auto;
+    height: 100px;
+    background-color: skyblue; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    color: white;
+    font-size: 40px;
+  }
+
+  h1>p {
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 25px;
+    /* display: none; */
+  }
+
+  h1>p>a {
+    color: red;
+    text-decoration: none;
+  }
+
+  .box1 {
+    width: 1191px;
+    height: 78px;
+    margin: 0 auto;
+    display: flex;
+    background-color: #fff;
+    border: 1px solid #000;
+    /* justify-content: center; */
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .box1 span {
+    margin-left: 15px;
+  }
+
+  .box1 .first,
+  .box1 .end {
+    background-color: skyblue;
+    color: white;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    width: 75px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .box1 .total {
+    font-size: 20px;
+  }
+
+  .box1 .prev,
+  .box1 .next {
+    background-color: skyblue;
+    color: white;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+    width: 90px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .box1 .jump {
+    width: 50px;
+    height: 36px;
+    margin-left: 10px;
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .box1 .jump1 {
+    width: 50px;
+    height: 40px;
+    margin-left: 10px;
+    font-size: 20px;
+  }
+
+  .box1 .select {
+    width: 60px;
+    height: 40px;
+    margin-left: 10px;
+    font-size: 20px;
+    text-align: center;
+  }
+
+  ul li {
+    list-style: none;
+  }
+
+  ul {
+    width: 1200px;
+    margin: 10px auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+  }
+
+  li {
+    width: 295px;
+    border: 1px solid #333;
+    margin-right: 3.4px;
+    height: 510px;
+    margin-bottom: 10px;
+    /* box-sizing: border-box; */
+    /* padding: 8px; */
+  }
+
+  img {
+    width: 295px;
+    height: 350px;
+    display: block;
+  }
+
+  ul .title {
+    font-size: 20px;
+  }
+</style>
+
+<body>
+  <h1>防站电商·商品列表
+    <p><a href="./index.html">回到首页</a></p>
+  </h1>
+  <div class="box1">
+    <span class="first">首页</span>
+    <span class="prev">上一页</span>
+    <span class="total">1 / 100</span>
+    <span class="next">下一页</span>
+    <span class="end">末页</span>
+    <input class='jump' type="text">
+    <button class="jump1">跳转</button>
+    <select class="select" name="" id="">
+      <option value="12">12条/页</option>
+      <option value="16">16条/页 </option>
+      <option value="20">20条/页</option>
+      <option value="24">24条/页</option>
+    </select>
+  </div>
+  <ul>
+    <li>
+
+    </li>
+  </ul>
+</body>
+<script src="/pages/axios.min.js"></script>
+<script src="/pages/http.js"></script>
+<script>
+
+  let PageTotal; // 总页数
+  let firstBtn = document.querySelector('.first'); // 首页
+  let endBtn = document.querySelector('.end'); // 末页
+  let prevBtn = document.querySelector('.prev'); // 上一页
+  let nextBtn = document.querySelector('.next'); // 下一页
+  let totalEle = document.querySelector('.total'); // 总页数
+  let selBtn = document.querySelector('.select'); // 选择每页显示数量
+  let jumpnumber = document.querySelector('.jump'); // 跳转页数
+  let jumpBtn = document.querySelector('.jump1');
+  let ulBox = document.querySelector('ul');
+  const queryObj = { // 初始化查询对象
+    current: 1,
+    pagesize: 12,
+  }
+  // 获得购物车数据
+  async function getData() {
+    // 获得第一页开始的12条购物车内容
+    let res = await http.get('/goods/list', { params: queryObj })
+    r = res.data.list;
+    
+    // 查看总页数
+    PageTotal = res.data.total;
+    
+    //let currentData = res.data.list.slice((current - 1) * pagesize, current * pagesize);
+    let htmlStr = ''
+    r.forEach(function(item) {
+      // console.log(item)
+      htmlStr += `
+      <li>
+      <img src="${item.img_big_logo}" alt="">
+      <p class="title">${item.title}</p>
+      <div class="info">
+        <p>￥ ${item.current_price}</p>
+        <p>￥ ${item.price}</p>
+      </div>
+    </li>`
+      
+    })
+
+    ulBox.innerHTML = htmlStr;
+    totalEle.innerHTML = `${queryObj.current}/${PageTotal}`
+    // prevBtn.className = queryObj.current == 1 ? 'prev disable' : 'prev';
+    // nextBtn.className = queryObj.current == PageTotal ? 'next disable' : 'next';
+  }
+  getData()
+  // 首页
+  firstBtn.onclick = function () {
+    if (queryObj.current == 1) return;
+    queryObj.current = 1;
+    getData();
+  }
+// 末页
+  endBtn.onclick = function () {
+    queryObj.current = PageTotal; // 设置当前页数为总页数
+    getData();
+  }
+// 下一页事件
+  nextBtn.onclick = function () {
+    if (queryObj.current == PageTotal) return;
+    queryObj.current++;
+    getData()
+  }
+// 上一页事件
+  prevBtn.onclick = function () {
+    if (queryObj.current == 1) return;
+    queryObj.current--;
+    getData();
+  }
+// 跳转页数事件
+  jumpBtn.onclick = function () {
+    queryObj.current = parseInt(jumpnumber.value);
+    getData();
+    if (queryObj.current > PageTotal) {
+      alert('超出最大页数');
+      queryObj.current = PageTotal;
+      getData();
+      jumpnumber.value = PageTotal;
+    }
+  }
+
+  selBtn.onchange = function () {
+    queryObj.pagesize = selBtn.value;
+    PageTotal = Math.ceil(PageTotal / queryObj.pagesize); 
+    queryObj.current = 1; 
+    getData(); 
+    jumpnumber.value = '' 
+   
+  }
+  ulBox.onclick = async function(e){ // 监听ul的点击事件
+    if(e.target.tagName == 'IMG'){ // 判断点击的元素是否是img
+        let res = await http.get('/goods/list', { params: queryObj }) // 获取数据
+            let r = res.data.list; // 获得商品列表
+            r.forEach(function(item){
+              if(e.target.src == item.img_big_logo) 
+              {   
+                //少了这个，商品详情就全部一样了
+                localStorage.setItem('goods_id', item.goods_id);
+
+                location.href = "./goods.html"
+              }
+            }
+            )
+      
+    }
+  }
+</script>
+</html>
